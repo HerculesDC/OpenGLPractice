@@ -35,6 +35,9 @@ void App::run() {
 bool App::init() {
 	if (m_bStarted) return false; //already init
 	m_bStarted = true;
+
+	SDL_Init(SDL_INIT_EVERYTHING);
+
 	m_bIsRun = SingletonHolder<WindowManager>::s_instance.init();
 
 	if (!m_bIsRun) return m_bIsRun;
@@ -86,4 +89,6 @@ void App::wait() {
 
 void App::quit() { m_bIsRun = false; }
 
-void App::cleanup() {}
+void App::cleanup() {
+	SDL_Quit();
+}

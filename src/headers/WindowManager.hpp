@@ -11,7 +11,7 @@ class WindowManager {
 		WindowManager(const WindowManager&) = delete;
 		WindowManager(WindowManager&&) = delete;
 		WindowManager& operator=(const WindowManager&) = delete;
-		compl WindowManager() = default;
+		compl WindowManager();
 		friend class SingletonHolder<WindowManager>;
 
 	private:
