@@ -22,11 +22,15 @@
     <ClCompile Include="..\include\GLAD\glad.c" />
     <ClCompile Include="..\src\App.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\RendererManager.cpp" />
+    <ClCompile Include="..\src\ShaderManager.cpp" />
     <ClCompile Include="..\src\WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\headers\App.hpp" />
-    <ClInclude Include="..\src\headers\SingletonHolder.h" />
+    <ClInclude Include="..\src\headers\RendererManager.hpp" />
+    <ClInclude Include="..\src\headers\ShaderManager.hpp" />
+    <ClInclude Include="..\src\headers\SingletonHolder.hpp" />
     <ClInclude Include="..\src\headers\WindowManager.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -130,7 +134,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -148,7 +152,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,9 +1,11 @@
 #define SDL_MAIN_HANDLED
 #include "headers/App.hpp"
 #include "headers/WindowManager.hpp"
-#include "headers/SingletonHolder.h"
+#include "headers/RendererManager.hpp"
+#include "headers/SingletonHolder.hpp"
 
 #include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
 #include "GLAD/glad.h"
 
 template <typename T> T& SingletonHolder<T>::s_instance = *(new T());
@@ -37,6 +39,7 @@ bool App::init() {
 	m_bStarted = true;
 
 	SDL_Init(SDL_INIT_EVERYTHING);
+	IMG_Init(IMG_INIT_JPG|IMG_INIT_PNG);
 
 	m_bIsRun = SingletonHolder<WindowManager>::s_instance.init();
 
@@ -55,6 +58,13 @@ bool App::init() {
 	int result = gladLoadGLLoader((GLADloadproc)(SDL_GL_GetProcAddress));
 	m_bIsRun = result > 0;
 
+	if (!m_bIsRun) return m_bIsRun;
+
+	m_bIsRun = SingletonHolder<RendererManager>::s_instance.init();
+	
+	if (!m_bIsRun) return m_bIsRun;
+	
+
 	return m_bIsRun;
 }
 
@@ -70,8 +80,8 @@ void App::processInput(){
 void App::update(Uint64 delta){}
 
 void App::render() {
-	glClearColor(0.1f, 0.1f, 0.2f, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	
+	SingletonHolder<RendererManager>::s_instance.render();
 	SDL_GL_SwapWindow(SingletonHolder<WindowManager>::s_instance.getWindow());
 }
 
@@ -90,5 +100,6 @@ void App::wait() {
 void App::quit() { m_bIsRun = false; }
 
 void App::cleanup() {
+	IMG_Quit();
 	SDL_Quit();
 }

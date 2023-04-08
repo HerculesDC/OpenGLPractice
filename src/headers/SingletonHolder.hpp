@@ -1,5 +1,5 @@
-#ifndef SINGLETONHOLDER_H
-#define SINGLETONHOLDER_H
+#ifndef SINGLETONHOLDER_HPP
+#define SINGLETONHOLDER_HPP
 
 template <typename T> class SingletonHolder {
 	public:

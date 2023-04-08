@@ -1,4 +1,4 @@
-#include "headers/SingletonHolder.h"
+#include "headers/SingletonHolder.hpp"
 #include "headers/App.hpp"
 
 template <typename T> T& SingletonHolder<T>::s_instance = *(new T());
