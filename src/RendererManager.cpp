@@ -5,11 +5,19 @@
 #include "GLAD/glad.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
+#include <iostream>
+
+#include "glm/glm.hpp"
+#include "glm/ext.hpp"
+#include "glm/gtx/string_cast.hpp"
+#include "glm/gtc/constants.hpp"
 
 template <typename T> T& SingletonHolder<T>::s_instance = *(new T());
 
 RendererManager::RendererManager(): m_pipeline(0), m_VAO(0), m_VBO(0), m_IBO(0),
-									m_TEX(0), m_TEX2(0), m_tVAO(0), m_tVBO(0) {
+									m_TEX(0), m_TEX2(0), m_tVAO(0), m_tVBO(0), 
+									m_tau(glm::two_pi<float>()), m_imgAngle(0), m_starAngle(0),
+									m_imgSpeed(.25f), m_starSpeed(.1f) {
 	m_shaders.reserve(3);
 	m_programs.reserve(3);
 }
@@ -29,7 +37,12 @@ bool RendererManager::init(){
 	return true;
 }
 
-void RendererManager::update(Uint64 delta){}
+void RendererManager::update(Uint64 delta){
+	m_starAngle += m_starSpeed * (delta / 1000.f) - ((m_tau) * ((m_starAngle >= m_tau) - (m_starAngle < 0)));
+	m_imgAngle += m_imgSpeed * (delta / 1000.f) - ((m_tau) * ((m_imgAngle >= m_tau) - (m_imgAngle < 0)));
+
+	//std::cout << "Delta: " << delta << "Image speed: " << m_imgSpeed << ", image angle: " << m_imgAngle << std::endl;
+}
 
 void RendererManager::render() {
 	glClearColor(0.1f, 0.1f, 0.2f, 1.f);
@@ -38,6 +51,39 @@ void RendererManager::render() {
 	glBindProgramPipeline(m_pipeline);
 	glUseProgramStages(m_pipeline, GL_VERTEX_SHADER_BIT, m_programs[0]);
 	glUseProgramStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_programs[2]);
+
+	//refresher: program, location, value
+	glProgramUniform1f(m_programs[2], 4, m_imgAngle);
+
+	//for reference: https://registry.khronos.org/OpenGL-Refpages/gl4/html/glProgramUniform.xhtml
+	auto transfMat4 = glm::mat4(1.f);
+	auto vec3z = glm::vec3(0.f, 0.f, 1.f);
+	transfMat4 = glm::rotate(transfMat4, m_starAngle, vec3z);
+
+	//std::cout << "Vertex matrix data:\n" << glm::to_string(transfMat4) << std::endl;
+	
+	//refresher: program, location, number of elements, should transpose, pointer to data
+	glProgramUniformMatrix4fv(m_programs[0], 2, 1, GL_FALSE, glm::value_ptr(transfMat4));
+
+	auto imgMat = glm::mat4(1.f);
+	auto imgOffset = glm::vec3(.5f, .5f, 0.f);
+	imgMat = glm::translate(imgMat, imgOffset);
+
+	/*********************************************************************************************
+	 * NOTE:
+	 * m_starAngle is used because they both refer to vertices. In Uniform location 2 we store star vertices,
+	 *		but in location 3 we store (star-shaped) sampling coordinates. If the sampling points remain fixed
+	 *		to the image they sample, when we rotate the drawing, the image will look rotated. The calls to
+	 *		translate are also used because the sampling points are normalized to [0,1], meaning that 
+	 *		what we see as the center of the image is actually its (0.5, 0.5) point. We need to set the center
+	 *		of rotation of the sampling to (0.5, 0.5), rotate the sampling points, and then return the origin
+	 *		to its initial state
+	 *********************************************************************************************/
+	imgMat = glm::rotate(imgMat, m_starAngle, vec3z);
+	
+	imgMat = glm::translate(imgMat, -imgOffset);
+	//std::cout << "Image matrix data:\n" << glm::to_string(imgMat) << std::endl;
+	glProgramUniformMatrix4fv(m_programs[0], 3, 1, GL_FALSE, glm::value_ptr(imgMat));
 	
 	glBindVertexArray(m_VAO);
 
@@ -51,7 +97,6 @@ void RendererManager::render() {
 	glBindVertexArray(0);
 }
 
-#include <iostream>
 bool RendererManager::setupShaders(){ //simply reads sources and compiles them. Reuses variable (check for clarity)
 
 	auto shaderName = SingletonHolder<ShaderManager>::s_instance.createShader(GL_VERTEX_SHADER, "res/shaders/shader00.vert");
@@ -95,8 +140,6 @@ bool RendererManager::createProgramPipeline(){
 	return true;
 }
 
-#include "glm/trigonometric.hpp"
-#include "glm/gtc/constants.hpp"
 bool RendererManager::initGLObjects(){
 	
 	//VERTEX SETUP 
@@ -198,17 +241,21 @@ bool RendererManager::initGLObjects(){
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SDL_FreeSurface(img2);
 
-	glBindProgramPipeline(m_pipeline);
-	glUseProgramStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_programs[2]);
+	//glBindProgramPipeline(m_pipeline);
+	//glUseProgramStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_programs[2]);
 
 	//NOTE: Accessing pipeline uniforms requires specific GL calls!!!
+	//Also, the program does not have to be in use (it seems)
 	
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_TEX);
-	glProgramUniform1i(m_programs[2], 3, 1); //set texture unit 0 to location 3 (sampler2D floorTexture)
+	glProgramUniform1i(m_programs[2], 5, 1); //set texture unit 0 to location 5 (sampler2D floorTexture)
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_TEX2);
-	glProgramUniform1i(m_programs[2], 4, 2); //set texture unit 1 to location 4 (sampler2D snakeTexture)
+	glProgramUniform1i(m_programs[2], 6, 2); //set texture unit 1 to location 6 (sampler2D snakeTexture)
+
+	//glEnable(GL_LINE_SMOOTH); //antialiasing
+	//glLineWidth(3.f); //self-explanatory
 
 	/*auto texName = "floorTexture";
 	std::cout << texName << " Uniform location : " << glGetUniformLocation(m_programs[2], texName) << std::endl;

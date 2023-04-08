@@ -9,6 +9,7 @@
 #include "GLAD/glad.h"
 
 template <typename T> T& SingletonHolder<T>::s_instance = *(new T());
+
 App::App() : m_bIsRun(false),
 			 m_bStarted(false),
 			 m_iCurrentDelta(0),
@@ -18,7 +19,7 @@ App::App() : m_bIsRun(false),
 			 m_iEnd(0),
 			 m_iTimeSinceStarted(0)
 {
-
+	m_iTargetDelta = (int)(1000.f / m_iFPS);
 }
 
 App::compl App(){}
@@ -26,9 +27,11 @@ App::compl App(){}
 void App::run() {
 	if (init()) {
 		while (m_bIsRun) {
+			wake();
 			processInput();
-			update(0);
+			update(SDL_GetTicks64()-m_iEnd);
 			render();
+			wait();
 		}
 	}
 	cleanup();
@@ -77,7 +80,9 @@ void App::processInput(){
 	}
 }
 
-void App::update(Uint64 delta){}
+void App::update(Uint64 delta){
+	SingletonHolder<RendererManager>::s_instance.update(delta);
+}
 
 void App::render() {
 	
@@ -92,9 +97,8 @@ void App::wake() {
 void App::wait() {
 	m_iEnd = SDL_GetTicks64();
 	m_iCurrentDelta = m_iEnd - m_iStart;
-	if (m_iCurrentDelta < m_iTargetDelta) {
-		SDL_Delay(m_iTargetDelta - m_iCurrentDelta);
-	}
+	//bit of branchless programming here
+	SDL_Delay((m_iTargetDelta - m_iCurrentDelta) * (m_iCurrentDelta < m_iTargetDelta));
 }
 
 void App::quit() { m_bIsRun = false; }

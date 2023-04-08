@@ -34,6 +34,10 @@ class RendererManager {
 		std::vector<float> m_vertices;
 		std::vector<GLuint> m_indices;
 		std::vector<float> m_texCoords;
+
+		//remova later
+		float m_tau, m_imgAngle, m_starAngle, m_imgSpeed, m_starSpeed;
+
 };
 
 #endif
