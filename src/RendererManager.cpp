@@ -48,12 +48,28 @@ void RendererManager::render() {
 	glClearColor(0.1f, 0.1f, 0.2f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	//model, view, projection matrices
+	auto model = glm::mat4(1.f);
+	model = glm::rotate(model, -1.1f, glm::vec3(1.f, 0.f, 0.f));
+
+	auto view = glm::mat4(1.f);
+	view = glm::translate(view, glm::vec3(0.f, -0.2f, -2.5f));
+
+	auto projection = glm::mat4(1.f);
+	//perspective: FoV, Aspect Ratio, Near, Far
+	projection = glm::perspective(1.f, 1.f, 0.1f, 100.f);
+
 	glBindProgramPipeline(m_pipeline);
 	glUseProgramStages(m_pipeline, GL_VERTEX_SHADER_BIT, m_programs[0]);
 	glUseProgramStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_programs[2]);
 
+	//uniform set for model-view-projection (vertex shader program)
+	glProgramUniformMatrix4fv(m_programs[0], 0, 1, GL_FALSE, glm::value_ptr(projection));
+	glProgramUniformMatrix4fv(m_programs[0], 1, 1, GL_FALSE, glm::value_ptr(view));
+	glProgramUniformMatrix4fv(m_programs[0], 2, 1, GL_FALSE, glm::value_ptr(model));
+
 	//refresher: program, location, value
-	glProgramUniform1f(m_programs[2], 4, m_imgAngle);
+	glProgramUniform1f(m_programs[2], 7, m_imgAngle); //specifics: shader01.frag program, location 7 (angle)
 
 	//for reference: https://registry.khronos.org/OpenGL-Refpages/gl4/html/glProgramUniform.xhtml
 	auto transfMat4 = glm::mat4(1.f);
@@ -63,7 +79,7 @@ void RendererManager::render() {
 	//std::cout << "Vertex matrix data:\n" << glm::to_string(transfMat4) << std::endl;
 	
 	//refresher: program, location, number of elements, should transpose, pointer to data
-	glProgramUniformMatrix4fv(m_programs[0], 2, 1, GL_FALSE, glm::value_ptr(transfMat4));
+	glProgramUniformMatrix4fv(m_programs[0], 5, 1, GL_FALSE, glm::value_ptr(transfMat4)); //shader00.vert program, location 5 (vertex transformation matrix)
 
 	auto imgMat = glm::mat4(1.f);
 	auto imgOffset = glm::vec3(.5f, .5f, 0.f);
@@ -83,7 +99,7 @@ void RendererManager::render() {
 	
 	imgMat = glm::translate(imgMat, -imgOffset);
 	//std::cout << "Image matrix data:\n" << glm::to_string(imgMat) << std::endl;
-	glProgramUniformMatrix4fv(m_programs[0], 3, 1, GL_FALSE, glm::value_ptr(imgMat));
+	glProgramUniformMatrix4fv(m_programs[0], 6, 1, GL_FALSE, glm::value_ptr(imgMat)); //shader00.vert program, location 6 (image transformation matrix)
 	
 	glBindVertexArray(m_VAO);
 
@@ -147,7 +163,7 @@ bool RendererManager::initGLObjects(){
 	//central point
 	m_vertices.push_back(0.f);
 	m_vertices.push_back(0.f);
-	m_vertices.push_back(0.f);
+	m_vertices.push_back(0.35f);
 	m_vertices.push_back(1.f);
 	//central text coord
 	m_texCoords.push_back(.5f);
@@ -155,7 +171,7 @@ bool RendererManager::initGLObjects(){
 	//first index
 	m_indices.push_back(0);
 
-	auto sides = 7;
+	auto sides = 8;
 	auto d_sides = sides << 1;
 	auto angle = glm::two_pi<float>()/d_sides;
 
@@ -173,7 +189,7 @@ bool RendererManager::initGLObjects(){
 		m_vertices.push_back(yCoord);
 		m_texCoords.push_back(.5f + (.5f * yCoord));
 
-		m_vertices.push_back(0.f);
+		m_vertices.push_back(0.2f * (i%2==0));
 		m_vertices.push_back(1.f);
 
 		m_indices.push_back(i + 1);
@@ -193,8 +209,8 @@ bool RendererManager::initGLObjects(){
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 	glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(float), m_vertices.data(), GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, vertSize, GL_FLOAT, GL_FALSE, vertSize*sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(3, vertSize, GL_FLOAT, GL_FALSE, vertSize*sizeof(float), (void*)0); //vertex attrib pointer at location 3 (vertexInData)
+	glEnableVertexAttribArray(3);
 
 	//glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -205,8 +221,8 @@ bool RendererManager::initGLObjects(){
 	//glBindVertexArray(m_tVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_tVBO);
 	glBufferData(GL_ARRAY_BUFFER, m_texCoords.size() * sizeof(float), m_texCoords.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), (void*)(0));
-	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), (void*)(0)); //vertex attrib pointer at location 4 (texInData)
+	glEnableVertexAttribArray(4);
 
 	auto img = IMG_Load("res/img/wall.jpg");
 	glGenTextures(1, &m_TEX);
@@ -249,10 +265,10 @@ bool RendererManager::initGLObjects(){
 	
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_TEX);
-	glProgramUniform1i(m_programs[2], 5, 1); //set texture unit 0 to location 5 (sampler2D floorTexture)
+	glProgramUniform1i(m_programs[2], 8, 1); //set texture unit 0 to location 8 (sampler2D floorTexture)
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_TEX2);
-	glProgramUniform1i(m_programs[2], 6, 2); //set texture unit 1 to location 6 (sampler2D snakeTexture)
+	glProgramUniform1i(m_programs[2], 9, 2); //set texture unit 1 to location 9 (sampler2D snakeTexture)
 
 	//glEnable(GL_LINE_SMOOTH); //antialiasing
 	//glLineWidth(3.f); //self-explanatory
@@ -261,6 +277,9 @@ bool RendererManager::initGLObjects(){
 	std::cout << texName << " Uniform location : " << glGetUniformLocation(m_programs[2], texName) << std::endl;
 	texName = "snakeTexture";
 	std::cout << texName << " Uniform location : " << glGetUniformLocation(m_programs[2], texName) << std::endl;*/
+
+	//glEnable(GL_CULL_FACE);
+	//glFrontFace(GL_CW);
 
 	return true;
 }
