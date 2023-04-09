@@ -46,7 +46,7 @@ void RendererManager::update(Uint64 delta){
 
 void RendererManager::render() {
 	glClearColor(0.1f, 0.1f, 0.2f, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//model, view, projection matrices
 	auto model = glm::mat4(1.f);
@@ -270,8 +270,8 @@ bool RendererManager::initGLObjects(){
 	glBindTexture(GL_TEXTURE_2D, m_TEX2);
 	glProgramUniform1i(m_programs[2], 9, 2); //set texture unit 1 to location 9 (sampler2D snakeTexture)
 
-	//glEnable(GL_LINE_SMOOTH); //antialiasing
-	//glLineWidth(3.f); //self-explanatory
+	glEnable(GL_LINE_SMOOTH); //antialiasing
+	glLineWidth(3.f); //self-explanatory
 
 	/*auto texName = "floorTexture";
 	std::cout << texName << " Uniform location : " << glGetUniformLocation(m_programs[2], texName) << std::endl;
@@ -280,6 +280,11 @@ bool RendererManager::initGLObjects(){
 
 	//glEnable(GL_CULL_FACE);
 	//glFrontFace(GL_CW);
+
+	//glEnable(GL_DEPTH_TEST);
+
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
 
 	return true;
 }
