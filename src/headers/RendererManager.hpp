@@ -2,6 +2,8 @@
 #define RENDERERMANAGER_HPP
 #include <vector>
 
+#include "GeometryGenerator.hpp"
+
 typedef unsigned long long int Uint64;
 typedef unsigned int GLuint;
 typedef int GLint;
@@ -34,6 +36,8 @@ class RendererManager {
 		std::vector<float> m_vertices;
 		std::vector<GLuint> m_indices;
 		std::vector<float> m_texCoords;
+
+		GeometryGenerator m_gg;
 
 		//remove later
 		float m_tau, m_imgAngle, m_starAngle, m_imgSpeed, m_starSpeed;

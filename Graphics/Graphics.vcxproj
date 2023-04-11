@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClCompile Include="..\include\GLAD\glad.c" />
     <ClCompile Include="..\src\App.cpp" />
+    <ClCompile Include="..\src\extras\_removed_code.cpp" />
+    <ClCompile Include="..\src\GeometryGenerator.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\RendererManager.cpp" />
     <ClCompile Include="..\src\ShaderManager.cpp" />
@@ -28,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\headers\App.hpp" />
+    <ClInclude Include="..\src\headers\GeometryGenerator.hpp" />
     <ClInclude Include="..\src\headers\RendererManager.hpp" />
     <ClInclude Include="..\src\headers\ShaderManager.hpp" />
     <ClInclude Include="..\src\headers\SingletonHolder.hpp" />
@@ -130,6 +133,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,6 +150,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
