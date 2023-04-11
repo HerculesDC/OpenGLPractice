@@ -19,7 +19,6 @@ GeometryGenerator::compl GeometryGenerator() {
 	m_geometry.clear();
 }
 
-#include <iostream>
 Geometry GeometryGenerator::generateGeometry(const char* name, uint location){
 
 	//hexahedron
@@ -45,15 +44,6 @@ Geometry GeometryGenerator::generateGeometry(const char* name, uint location){
 		}
 	}
 	vertices.shrink_to_fit();
-
-	int ref = 0;
-	for (auto coord : vertices) {
-		std::cout << coord << ",";
-		++ref;
-		if (ref % 4 == 0) {
-			std::cout << std:: endl;
-		}
-	}
 
 	//indices = { 0, 3, 4, 1, 4, 5, 2, 5, 3, 3, 4, 6, 4, 5, 7, 5, 3, 8 }; //GL_TRIANGLES
 	indices = { 0, 3, 4, 6, 5, 3, 0, 4 }; //GL_TRIANGLE_STRIP
