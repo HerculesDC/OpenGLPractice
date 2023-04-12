@@ -1,5 +1,12 @@
 /*
-	GL OBJECT GENERATION CODE
+	GL OBJECT GENERATION CODE (RendererManager.hpp/cpp)
+
+	//******* FROM HEADER: **********
+	GLuint m_VAO, m_VBO, m_IBO, m_TEX, m_TEX2, m_tVAO, m_tVBO;
+		std::vector<float> m_vertices;
+		std::vector<GLuint> m_indices;
+		std::vector<float> m_texCoords;
+
 
 //****VERTEX SETUP FOR FOLDED STAR *****
 	//vertices will be passed in a vec4 packing style.
@@ -212,4 +219,13 @@
 	glDrawElements(GL_TRIANGLE_STRIP, geom.ibo_sz, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0); //unbind array
+
+
+	//*******FROM DESTRUCTOR
+
+	glDeleteVertexArrays(1, &m_VAO);
+	glDeleteVertexArrays(1, &m_tVAO);
+	glDeleteBuffers(1, &m_VBO);
+	glDeleteBuffers(1, &m_tVBO);
+	glDeleteBuffers(1, &m_IBO);
 */

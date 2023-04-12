@@ -15,21 +15,14 @@
 
 template <typename T> T& SingletonHolder<T>::s_instance = *(new T());
 
-RendererManager::RendererManager(): m_pipeline(0), m_VAO(0), m_VBO(0), m_IBO(0),
-									m_TEX(0), m_TEX2(0), m_tVAO(0), m_tVBO(0), 
-									m_tau(glm::two_pi<float>()), m_imgAngle(0), m_starAngle(0),
+RendererManager::RendererManager(): m_pipeline(0), m_tau(glm::two_pi<float>()), m_imgAngle(0), m_starAngle(0),
 									m_imgSpeed(.25f), m_starSpeed(.1f), m_gg(GeometryGenerator()) {
 	m_shaders.reserve(3);
 	m_programs.reserve(3);
+	m_pos.reserve(10);
 }
 
-RendererManager::compl RendererManager() {
-	glDeleteVertexArrays(1, &m_VAO);
-	glDeleteVertexArrays(1, &m_tVAO);
-	glDeleteBuffers(1, &m_VBO);
-	glDeleteBuffers(1, &m_tVBO);
-	glDeleteBuffers(1, &m_IBO);
-}
+RendererManager::compl RendererManager() {}
 
 bool RendererManager::init(){
 	if (!setupShaders()) return false;
@@ -41,8 +34,6 @@ bool RendererManager::init(){
 void RendererManager::update(Uint64 delta){
 	m_starAngle += m_starSpeed * (delta / 1000.f) - ((m_tau) * ((m_starAngle >= m_tau) - (m_starAngle < 0)));
 	m_imgAngle += m_imgSpeed * (delta / 1000.f) - ((m_tau) * ((m_imgAngle >= m_tau) - (m_imgAngle < 0)));
-
-	//std::cout << "Delta: " << delta << "Image speed: " << m_imgSpeed << ", image angle: " << m_imgAngle << std::endl;
 }
 
 void RendererManager::render() {
@@ -54,7 +45,7 @@ void RendererManager::render() {
 	model = glm::rotate(model, -1.1f, glm::vec3(1.f, 0.f, 0.f));
 
 	auto view = glm::mat4(1.f);
-	view = glm::translate(view, glm::vec3(0.f, 0.f, -2.5f));
+	view = glm::translate(view, glm::vec3(0.f, 0.f, -3.f));
 
 	auto projection = glm::mat4(1.f);
 	//perspective: FoV, Aspect Ratio, Near, Far
@@ -69,20 +60,34 @@ void RendererManager::render() {
 	glProgramUniformMatrix4fv(m_programs[0], 1, 1, GL_FALSE, glm::value_ptr(view));
 	glProgramUniformMatrix4fv(m_programs[0], 2, 1, GL_FALSE, glm::value_ptr(model));
 
-	auto transfMat4 = glm::mat4(1.f);
-	auto vec3z = glm::vec3(0.f, 0.f, 1.f);
-	transfMat4 = glm::rotate(transfMat4, m_starAngle, vec3z);
-	
-	//refresher: program, location, number of elements, should transpose, pointer to data
-	glProgramUniformMatrix4fv(m_programs[0], 5, 1, GL_FALSE, glm::value_ptr(transfMat4)); //shader00.vert program, location 5 (vertex transformation matrix)
-	
-	glUseProgramStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_programs[1]);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	Geometry geom = m_gg.getGeometry("Hexahedron");
 	glBindVertexArray(geom.vao);
-	glDrawElements(GL_TRIANGLE_STRIP, geom.ibo_sz, GL_UNSIGNED_INT, 0);
 
+	glUseProgramStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_programs[1]);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+
+	for (size_t i = 0; i < m_pos.size(); ++i) {
+		auto transfMat4 = glm::mat4(1.f);
+		transfMat4 = glm::translate(transfMat4, m_pos[i]);
+		auto angle = m_starAngle;
+		if (i % 3 == 0) {
+			angle *= -5;
+		}
+		else if (i % 2 == 0) {
+			angle = 0;
+		}
+		transfMat4 = glm::rotate(transfMat4, angle, glm::vec3(0.f, 0.f, 1.f));
+		transfMat4 = glm::scale(transfMat4, glm::vec3(.5f));
+
+		//refresher: program, location, number of elements, should transpose, pointer to data
+		glProgramUniformMatrix4fv(m_programs[0], 5, 1, GL_FALSE, glm::value_ptr(transfMat4)); //shader00.vert program, location 5 (vertex transformation matrix)
+
+
+		glDrawElements(GL_TRIANGLE_STRIP, geom.ibo_sz, GL_UNSIGNED_INT, 0);
+	}
+	
 	glBindVertexArray(0);
 }
 
@@ -132,6 +137,17 @@ bool RendererManager::createProgramPipeline(){
 bool RendererManager::initGLObjects(){	
 	
 	Geometry g = m_gg.generateGeometry("Hexahedron", 3); //Vertex Shader vertex attribute location;
+
+	m_pos.push_back(glm::vec3(  0.f,  0.f,  0.f));
+	m_pos.push_back(glm::vec3(  .5f,  .3f,  .7f));
+	m_pos.push_back(glm::vec3( -.5f, -.3f, 1.5f));
+	m_pos.push_back(glm::vec3( 1.5f,  .5f,  1.f));
+	m_pos.push_back(glm::vec3(-1.5f,  .5f, 1.7f));
+	m_pos.push_back(glm::vec3(  .5f, -.7f,  .7f));
+	m_pos.push_back(glm::vec3( -.5f, -.3f,  .7f));
+	m_pos.push_back(glm::vec3( .25f,  .3f, .27f));
+	m_pos.push_back(glm::vec3(  .5f,-1.3f,  .0f));
+	m_pos.push_back(glm::vec3(-1.5f, -.5f,  .7f));
 
 	glEnable(GL_DEPTH_TEST); //this is what causes face occlusion
 

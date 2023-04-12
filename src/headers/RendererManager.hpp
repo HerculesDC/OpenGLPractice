@@ -2,6 +2,7 @@
 #define RENDERERMANAGER_HPP
 #include <vector>
 
+#include "glm/vec3.hpp"
 #include "GeometryGenerator.hpp"
 
 typedef unsigned long long int Uint64;
@@ -29,15 +30,11 @@ class RendererManager {
 		bool initGLObjects();
 	private:
 		std::vector<GLuint> m_shaders; //needed to transfer info between methods
-		std::vector<GLuint> m_programs; //separable
+		std::vector<GLuint> m_programs; //separable, one per shader
 		GLuint m_pipeline; //only one for now
 
-		GLuint m_VAO, m_VBO, m_IBO, m_TEX, m_TEX2, m_tVAO, m_tVBO;
-		std::vector<float> m_vertices;
-		std::vector<GLuint> m_indices;
-		std::vector<float> m_texCoords;
-
 		GeometryGenerator m_gg;
+		std::vector<glm::vec3> m_pos;
 
 		//remove later
 		float m_tau, m_imgAngle, m_starAngle, m_imgSpeed, m_starSpeed;
