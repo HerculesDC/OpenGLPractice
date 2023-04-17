@@ -13,6 +13,7 @@ Camera::Camera() : m_width(800), m_height(800), m_FoV(1.f), m_near(.1f), m_far(1
 
 //PRIVATE METHODS
 void Camera::updateCameraView() { 
+	//FIX!!! ALWAYS LOOKS AT (0, 0, -1)
 	m_cameraView = glm::lookAt(m_position, /*m_position +*/ m_forward, glm::vec3(0.f, 1.f, 0.f));
 }
 
