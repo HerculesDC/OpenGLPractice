@@ -3,6 +3,8 @@
 #include "headers/WindowManager.hpp"
 #include "headers/RendererManager.hpp"
 #include "headers/SingletonHolder.hpp"
+#include "headers/InputProcessor.hpp"
+#include "headers/Command.hpp"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
@@ -73,9 +75,18 @@ bool App::init() {
 
 void App::processInput(){
 	SDL_Event evt;
+	InputProcessor inp;
 	while (SDL_PollEvent(&evt)) {
 		if (evt.type == SDL_QUIT) {
 			quit();
+		}
+		if (evt.type == SDL_KEYDOWN) {
+			auto cmd = inp.handleInput(evt.key);
+			if (cmd) {
+				decltype(auto) cam = SingletonHolder<RendererManager>::s_instance.getCamera();
+				auto actualCommand = cmd->execute(cam);
+				actualCommand();
+			}
 		}
 	}
 }

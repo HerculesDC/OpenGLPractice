@@ -16,13 +16,17 @@
 template <typename T> T& SingletonHolder<T>::s_instance = *(new T());
 
 RendererManager::RendererManager(): m_pipeline(0), m_tau(glm::two_pi<float>()), m_imgAngle(0), m_starAngle(0),
-									m_imgSpeed(.25f), m_starSpeed(.1f), m_gg(GeometryGenerator()) {
+									m_imgSpeed(.25f), m_starSpeed(.1f), m_gg(GeometryGenerator()),
+									m_camera(Camera())
+{
 	m_shaders.reserve(3);
 	m_programs.reserve(3);
 	m_pos.reserve(10);
 }
 
 RendererManager::compl RendererManager() {}
+
+Camera& RendererManager::getCamera() { return m_camera; }
 
 bool RendererManager::init(){
 	if (!setupShaders()) return false;
@@ -31,9 +35,15 @@ bool RendererManager::init(){
 	return true;
 }
 
+float cycle(float current, float amt, float min, float max) { 
+	return current + amt - ((max - min)*(current >= max)-(current < min));
+}
+
 void RendererManager::update(Uint64 delta){
-	m_starAngle += m_starSpeed * (delta / 1000.f) - ((m_tau) * ((m_starAngle >= m_tau) - (m_starAngle < 0)));
-	m_imgAngle += m_imgSpeed * (delta / 1000.f) - ((m_tau) * ((m_imgAngle >= m_tau) - (m_imgAngle < 0)));
+	auto timeFactor = delta / 1000.f;
+	m_starAngle = cycle(m_starAngle, m_starSpeed*timeFactor, 0, m_tau);
+	m_imgAngle = cycle(m_imgAngle, m_imgSpeed*timeFactor, 0, m_tau);
+	m_camera.updateCamera();
 }
 
 void RendererManager::render() {
@@ -44,20 +54,13 @@ void RendererManager::render() {
 	auto model = glm::mat4(1.f);
 	model = glm::rotate(model, -1.1f, glm::vec3(1.f, 0.f, 0.f));
 
-	auto view = glm::mat4(1.f);
-	view = glm::translate(view, glm::vec3(0.f, 0.f, -3.f));
-
-	auto projection = glm::mat4(1.f);
-	//perspective: FoV, Aspect Ratio, Near, Far
-	projection = glm::perspective(1.f, 1.f, 0.1f, 100.f);
-
 	glBindProgramPipeline(m_pipeline);
 	glUseProgramStages(m_pipeline, GL_VERTEX_SHADER_BIT, m_programs[0]);
 
 	//uniform set for model-view-projection (vertex shader program)
 	//for reference: https://registry.khronos.org/OpenGL-Refpages/gl4/html/glProgramUniform.xhtml
-	glProgramUniformMatrix4fv(m_programs[0], 0, 1, GL_FALSE, glm::value_ptr(projection));
-	glProgramUniformMatrix4fv(m_programs[0], 1, 1, GL_FALSE, glm::value_ptr(view));
+	glProgramUniformMatrix4fv(m_programs[0], 0, 1, GL_FALSE, m_camera.getCameraProjectionData());
+	glProgramUniformMatrix4fv(m_programs[0], 1, 1, GL_FALSE, m_camera.getCameraViewData());
 	glProgramUniformMatrix4fv(m_programs[0], 2, 1, GL_FALSE, glm::value_ptr(model));
 
 
@@ -83,7 +86,6 @@ void RendererManager::render() {
 
 		//refresher: program, location, number of elements, should transpose, pointer to data
 		glProgramUniformMatrix4fv(m_programs[0], 5, 1, GL_FALSE, glm::value_ptr(transfMat4)); //shader00.vert program, location 5 (vertex transformation matrix)
-
 
 		glDrawElements(GL_TRIANGLE_STRIP, geom.ibo_sz, GL_UNSIGNED_INT, 0);
 	}

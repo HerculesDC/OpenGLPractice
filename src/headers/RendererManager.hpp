@@ -4,6 +4,7 @@
 
 #include "glm/vec3.hpp"
 #include "GeometryGenerator.hpp"
+#include "Camera.hpp"
 
 typedef unsigned long long int Uint64;
 typedef unsigned int GLuint;
@@ -19,6 +20,7 @@ class RendererManager {
 		compl RendererManager();
 	public:
 		friend class SingletonHolder<RendererManager>;
+		Camera& getCamera();
 		bool init();
 		void update(Uint64);
 		void render();
@@ -32,6 +34,8 @@ class RendererManager {
 		std::vector<GLuint> m_shaders; //needed to transfer info between methods
 		std::vector<GLuint> m_programs; //separable, one per shader
 		GLuint m_pipeline; //only one for now
+
+		Camera m_camera;
 
 		GeometryGenerator m_gg;
 		std::vector<glm::vec3> m_pos;

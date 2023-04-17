@@ -21,19 +21,27 @@
   <ItemGroup>
     <ClCompile Include="..\include\GLAD\glad.c" />
     <ClCompile Include="..\src\App.cpp" />
+    <ClCompile Include="..\src\Camera.cpp" />
     <ClCompile Include="..\src\extras\_removed_code.cpp" />
     <ClCompile Include="..\src\GeometryGenerator.cpp" />
+    <ClCompile Include="..\src\InputProcessor.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\RendererManager.cpp" />
     <ClCompile Include="..\src\ShaderManager.cpp" />
+    <ClCompile Include="..\src\Transform.cpp" />
     <ClCompile Include="..\src\WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\headers\App.hpp" />
+    <ClInclude Include="..\src\headers\Camera.hpp" />
+    <ClInclude Include="..\src\headers\Command.hpp" />
+    <ClInclude Include="..\src\headers\Component.hpp" />
     <ClInclude Include="..\src\headers\GeometryGenerator.hpp" />
+    <ClInclude Include="..\src\headers\InputProcessor.hpp" />
     <ClInclude Include="..\src\headers\RendererManager.hpp" />
     <ClInclude Include="..\src\headers\ShaderManager.hpp" />
     <ClInclude Include="..\src\headers\SingletonHolder.hpp" />
+    <ClInclude Include="..\src\headers\Transform.hpp" />
     <ClInclude Include="..\src\headers\WindowManager.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

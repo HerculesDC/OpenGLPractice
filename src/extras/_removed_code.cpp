@@ -154,6 +154,16 @@
 	//moves 2.5 units away from reference on the z axis (positive z points towards reference
 	view = glm::translate(view, glm::vec3(0.f, 0.f, -2.5f));
 
+
+	*************************************************************************************
+	auto view = glm::mat4(1.f);
+	view = glm::translate(view, glm::vec3(0.f, 0.f, -3.f));
+
+	auto projection = glm::mat4(1.f);
+	//perspective: FoV, Aspect Ratio, Near, Far
+	projection = glm::perspective(m_FoVTest, 1.f, 0.1f, 100.f);
+	***************************************************************************************
+
 	auto projection = glm::mat4(1.f);
 	//perspective: FoV, Aspect Ratio, Near, Far
 	projection = glm::perspective(1.f, 1.f, 0.1f, 100.f);
