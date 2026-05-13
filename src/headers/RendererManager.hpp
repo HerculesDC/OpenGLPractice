@@ -41,6 +41,10 @@ class RendererManager {
 		std::vector<glm::vec3> m_pos;
 
 		//remove later
+		GLuint m_TEX, m_TEX2, m_VAO, m_tVBO;
+		std::vector<float> m_texCoords = { .5f, .0f, .5f, .0f, .5f, .0f,
+										   .0f, .5f, .5f, .5f, 1.f, .5f,
+										   .5f, 1.f, 1.f, .5f, 1.f, 1.f};
 		float m_tau, m_imgAngle, m_starAngle, m_imgSpeed, m_starSpeed;
 };
 

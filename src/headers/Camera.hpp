@@ -31,6 +31,7 @@ class Camera {
 		bool m_invertX, m_invertY;
 		int m_width, m_height;
 		float m_FoV, m_near, m_far, m_roll, m_pitch, m_yaw;
+		float m_moveSpeed, m_turnSpeed;
 		glm::vec3 m_position, m_forward, m_up, m_right; //m_up is camera up, not world up
 		glm::mat4 m_cameraView;
 		glm::mat4 m_projection;

@@ -17,7 +17,8 @@ void main(){
 	vec4 vertApplied = vertTransfMatrix * vertexInData;
     gl_Position = projection * view * model * vertApplied;
     vertexOutData = projection * view * model * vertApplied;
-	vec4 imgApplied = imgTransfMatrix * vec4(texInData.x, texInData.y, 1.0, 1.0);
+	//vec4 imgApplied = imgTransfMatrix * vec4(texInData.x, texInData.y, 1.0, 1.0);
 	//not needed to apply this to texture (shouldn't make sense)
-	texOutData = vec2(imgApplied.x, imgApplied.y);
+	//texOutData = vec2(imgApplied.x, imgApplied.y);
+	texOutData = texInData;
 }

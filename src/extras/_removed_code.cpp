@@ -87,7 +87,7 @@
 	glBindBuffer(GL_ARRAY_BUFFER, m_tVBO);
 	glBufferData(GL_ARRAY_BUFFER, m_texCoords.size() * sizeof(float), m_texCoords.data(), GL_STATIC_DRAW);
 	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), (void*)(0)); //vertex attrib pointer at location 4 (texInData)
-	glEnableVertexArrayAttrib(m_VAO,4);
+	glEnableVertexArrayAttrib(m_VAO,4); //same vertex attribute location
 
 	auto img = IMG_Load("res/img/wall.jpg");
 	glGenTextures(1, &m_TEX);

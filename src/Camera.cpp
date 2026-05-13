@@ -3,7 +3,7 @@
 
 //CONSTRUCTOR
 Camera::Camera() : m_width(800), m_height(800), m_FoV(1.f), m_near(.1f), m_far(100.f), m_roll(0.f),
-				   m_pitch(0.f), m_yaw(0.f), m_position(glm::vec3(0.f, .0f, -3.f)),
+				   m_pitch(0.f), m_yaw(0.f), m_position(glm::vec3(0.f, .0f, 4.f)), m_moveSpeed(0.25f), m_turnSpeed(0.1f),
 				   m_forward(glm::vec3(0.f, 0.f, -1.f)), m_up(glm::vec3(0.f)), m_right(glm::vec3(0.f))
 {
 	m_cameraView = glm::mat4(1.f);
@@ -14,7 +14,7 @@ Camera::Camera() : m_width(800), m_height(800), m_FoV(1.f), m_near(.1f), m_far(1
 //PRIVATE METHODS
 void Camera::updateCameraView() { 
 	//FIX!!! ALWAYS LOOKS AT (0, 0, -1)
-	m_cameraView = glm::lookAt(m_position, /*m_position +*/ m_forward, glm::vec3(0.f, 1.f, 0.f));
+	m_cameraView = glm::lookAt(m_position, m_position + m_forward, glm::vec3(0.f, 1.f, 0.f));
 }
 
 void Camera::updateCameraProjection() {
@@ -33,7 +33,7 @@ void Camera::lookAt(glm::vec3 target){
 }
 
 void Camera::move(glm::vec3 moveBy) {
-	m_position = m_position + moveBy;
+	m_position = m_position + (moveBy * m_moveSpeed);
 	updateCameraView();
 }
 

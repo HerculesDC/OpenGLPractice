@@ -67,11 +67,16 @@ void RendererManager::render() {
 	Geometry geom = m_gg.getGeometry("Hexahedron");
 	glBindVertexArray(geom.vao);
 
-	glUseProgramStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_programs[1]);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-
 	for (size_t i = 0; i < m_pos.size(); ++i) {
+
+		glUseProgramStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_programs[1+(i%2)]);
+		
+		glProgramUniform1f(m_programs[2], 7, 0);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		if (i % 2 == 0) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
+
 		auto transfMat4 = glm::mat4(1.f);
 		transfMat4 = glm::translate(transfMat4, m_pos[i]);
 		auto angle = m_starAngle;
@@ -150,6 +155,41 @@ bool RendererManager::initGLObjects(){
 	m_pos.push_back(glm::vec3( .25f,  .3f, .27f));
 	m_pos.push_back(glm::vec3(  .5f,-1.3f,  .0f));
 	m_pos.push_back(glm::vec3(-1.5f, -.5f,  .7f));
+
+	glBindVertexArray(g.vao);
+	glGenBuffers(1, &m_tVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_tVBO);
+	glBufferData(GL_ARRAY_BUFFER, m_texCoords.size() * sizeof(float), m_texCoords.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(0)); //vertex attrib pointer at location 4 (texInData)
+	glEnableVertexArrayAttrib(g.vao, 4);
+
+	auto img = IMG_Load("res/img/wall.jpg");
+	glGenTextures(1, &m_TEX);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_TEX);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->w, img->h, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
+	glGenerateMipmap(GL_TEXTURE_2D); //has to be set
+	SDL_FreeSurface(img); //CLEANUP
+
+	glProgramUniform1i(m_programs[2], 8, 1); //set texture unit 1 to location 8 (sampler2D floorTexture)
+
+	auto img2 = IMG_Load("res/img/lachesis.png");
+	glGenTextures(1, &m_TEX2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_TEX2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img2->w, img2->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img2->pixels);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(img2);
+
+	glProgramUniform1i(m_programs[2], 9, 2); //set texture unit 2 to location 9 (sampler2D snakeTexture)
 
 	glEnable(GL_DEPTH_TEST); //this is what causes face occlusion
 

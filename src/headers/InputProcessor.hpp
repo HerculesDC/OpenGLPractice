@@ -18,7 +18,7 @@ class InputProcessor {
 		Command* m_fwdCommand; //forward-back
 		Command* m_stfCommand; //strafe left-right
 		Command* m_ascCommand; //ascend-descend
-		//Command* m_yawCommand; //turns left-right aroundy
+		//Command* m_yawCommand; //turns left-right around y
 		//Command* m_pitCommand; //look up-down
 		//Command* m_rolCommand; //roll cw-ccw
 };
